@@ -69,7 +69,7 @@ func Sign(p int8) int8 {
 	return 0
 }
 
-func abs8(p int8) int8 {
+func Abs8(p int8) int8 {
 	if p < 0 {
 		return -p
 	}
@@ -138,7 +138,7 @@ func pieceMoves(b Board, from int8) []int8 {
 	p := b[from]
 	side := Sign(p)
 	r, f := RankOf(from), FileOf(from)
-	switch abs8(p) {
+	switch Abs8(p) {
 	case General:
 		return generalMoves(b, r, f, side)
 	case Advisor:
@@ -402,7 +402,7 @@ func Coord(idx int8) string {
 
 // Glyph returns the Chinese glyph for a signed piece value ("" for empty).
 func Glyph(p int8) string {
-	t := abs8(p)
+	t := Abs8(p)
 	if t < 1 || t > 7 {
 		return ""
 	}
