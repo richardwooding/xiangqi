@@ -7,6 +7,7 @@ package xiangqi
 import (
 	"errors"
 	"fmt"
+	"slices"
 )
 
 // Board is the 90-point Xiangqi board (idx = rank*9 + file).
@@ -110,7 +111,7 @@ func ownHalf(r, side int8) bool {
 func Start() Board {
 	var b Board
 	back := [9]int8{Chariot, Horse, Elephant, Advisor, General, Advisor, Elephant, Horse, Chariot}
-	for f := int8(0); f < 9; f++ {
+	for f := range int8(9) {
 		b[IdxOf(0, f)] = back[f]
 		b[IdxOf(9, f)] = -back[f]
 	}
@@ -288,7 +289,7 @@ func soldierMoves(b Board, r, f, side int8) []int8 {
 // findGeneral returns the board index of side's general, or -1 if absent.
 func findGeneral(b Board, side int8) int8 {
 	want := General * side
-	for i := int8(0); i < 90; i++ {
+	for i := range int8(90) {
 		if b[i] == want {
 			return i
 		}
@@ -318,14 +319,12 @@ func generalsFacing(b Board) bool {
 
 // attackedBy reports whether any piece of side `by` pseudo-attacks target.
 func attackedBy(b Board, by, target int8) bool {
-	for i := int8(0); i < 90; i++ {
+	for i := range int8(90) {
 		if b[i] == 0 || Sign(b[i]) != by {
 			continue
 		}
-		for _, t := range pieceMoves(b, i) {
-			if t == target {
-				return true
-			}
+		if slices.Contains(pieceMoves(b, i), target) {
+			return true
 		}
 	}
 	return false
@@ -348,7 +347,7 @@ func InCheck(b Board, side int8) bool {
 // pseudo-legal move that does not leave the mover's own general in check.
 func LegalMoves(b Board, side int8) [][2]int8 {
 	var out [][2]int8
-	for i := int8(0); i < 90; i++ {
+	for i := range int8(90) {
 		if b[i] == 0 || Sign(b[i]) != side {
 			continue
 		}
@@ -369,13 +368,7 @@ func Validate(b Board, side, from, to int8) error {
 	if b[from] == 0 || Sign(b[from]) != side {
 		return ErrNotYourPiece
 	}
-	found := false
-	for _, t := range pieceMoves(b, from) {
-		if t == to {
-			found = true
-			break
-		}
-	}
+	found := slices.Contains(pieceMoves(b, from), to)
 	if !found {
 		return ErrIllegalMove
 	}
